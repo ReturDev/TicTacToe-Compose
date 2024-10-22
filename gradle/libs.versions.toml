@@ -10,6 +10,7 @@ activityCompose = "1.9.3"
 composeBom = "2024.10.00"
 hilt = "2.48"
 hiltNavigationCompose = "1.2.0"
+googleServices = "4.4.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -34,4 +35,4 @@ androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-com
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 daggerHiltAndroid = { id = "com.google.dagger.hilt.android", version.ref = "hilt"}
-
+googleServices = { id = "com.google.gms.google-services" , version.ref = "googleServices"}
