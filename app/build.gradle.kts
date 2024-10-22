@@ -30,6 +30,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            resValue("string","app_name", "TicTacToe")
+        }
+        debug {
+            isDebuggable = true
+            applicationIdSuffix = ".debug"
+            resValue("string", "app_name", "[DEBUG]TicTacToe")
         }
     }
     compileOptions {
