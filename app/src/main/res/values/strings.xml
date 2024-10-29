@@ -1,4 +1,7 @@
 <resources>
     <!--Authentication Screen-->
     <string name="authentication_sign_in_to_play">Sign in to start playing</string>
+    <string name="authentication_with_email">Continue with Email</string>
+    <string name="authentication_with_google">Continue with Google</string>
+    <string name="authentication_as_guest">Continue as Guest</string>
 </resources>
