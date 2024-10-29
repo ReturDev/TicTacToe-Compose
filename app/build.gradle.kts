@@ -84,4 +84,7 @@ dependencies {
     //HiltNavigation
     implementation(libs.androidx.hilt.navigation.compose)
 
+    //Constraint Layout
+    implementation(libs.androidx.constraintlayout.compose)
+
 }
