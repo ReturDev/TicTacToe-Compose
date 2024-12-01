@@ -23,6 +23,45 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.returdev.tictactoe.R
 import com.returdev.tictactoe.ui.screen.authentication.model.AuthenticationErrorType
 
+/**
+ * A composable function that displays an email input field with error handling and optional supporting text.
+ * This function provides a label for the email input, displays an error message if the email is invalid,
+ * and allows the user to input their email address with real-time validation.
+ *
+ * @param modifier The modifier to be applied to the [TextField] composable. Defaults to [Modifier].
+ * @param value The current value of the email input field.
+ * @param emailError An optional error type related to the email field. If non-null, an error message
+ *                   specific to the email validation will be displayed beneath the field.
+ * @param isEnabled A boolean value indicating whether the email field is enabled or disabled.
+ * @param onValueChange A lambda function that is invoked whenever the email value changes.
+ *                      It takes two parameters: the new value of the email and a boolean indicating
+ *                      whether the current error is not null.
+ */
+@Composable
+private fun EmailTextField(
+    modifier : Modifier,
+    value : String,
+    emailError : AuthenticationErrorType.Email?,
+    isEnabled : Boolean,
+    onValueChange : (String, Boolean) -> Unit
+) {
+    TextField(
+        modifier = modifier,
+        value = value,
+        onValueChange = { newValue -> onValueChange(newValue, emailError != null) },
+        label = {
+            Text(text = stringResource(id = R.string.authentication_email_email_label))
+        },
+        isError = emailError != null,
+        supportingText = {
+            emailError?.let {
+                Text(text = stringResource(id = it.stringRes))
+            }
+        },
+        singleLine = true,
+        enabled = isEnabled
+    )
+}
 
 /**
  * A composable function that displays a password input field with optional supporting text and error handling.

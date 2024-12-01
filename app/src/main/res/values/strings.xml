@@ -15,4 +15,5 @@
     <string name="authentication_email_confirm_password">Confirm password</string>
     <string name="authentication_email_password">Password</string>
     <string name="authentication_email_password_length_required">Enter at least 8 characters</string>
+    <string name="authentication_email_email_label">Email</string>
 </resources>
