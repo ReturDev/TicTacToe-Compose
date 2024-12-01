@@ -4,4 +4,10 @@
     <string name="authentication_with_email">Continue with Email</string>
     <string name="authentication_with_google">Continue with Google</string>
     <string name="authentication_as_guest">Continue as Guest</string>
+
+    <!--EmailAuthDialog-->
+    <string name="authentication_email_sign_in">Sign in</string>
+    <string name="authentication_email_sign_up">Sign up</string>
+    <string name="authentication_email_have_not_account">Don´t have an account?</string>
+    <string name="authentication_email_have_account">Already have an account?</string>
 </resources>
