@@ -13,4 +13,6 @@
     <string name="authentication_email_hide_password">Hide password</string>
     <string name="authentication_email_show_password">Show password</string>
     <string name="authentication_email_confirm_password">Confirm password</string>
+    <string name="authentication_email_password">Password</string>
+    <string name="authentication_email_password_length_required">Enter at least 8 characters</string>
 </resources>

@@ -25,6 +25,42 @@ import com.returdev.tictactoe.ui.screen.authentication.model.AuthenticationError
 
 
 /**
+ * A composable function that displays a password input field with optional supporting text and error handling.
+ * This function uses [GenericPasswordTextField] to manage password input, including visibility toggle,
+ * and provides a label, optional supporting text, and error handling for the password field.
+ *
+ * @param value The current value of the password input field.
+ * @param showSupportingText A boolean value that determines whether supporting text should be shown beneath
+ *                           the password field. If `true`, a predefined message about the password length
+ *                           requirement is displayed.
+ * @param passwordError An optional error type related to the password field. If non-null, an error message
+ *                      will be displayed below the field.
+ * @param isEnabled A boolean value indicating whether the password field is enabled or disabled.
+ * @param onValueChange A lambda function that is invoked whenever the password value changes.
+ *                      It takes two parameters: the new value of the password and a boolean indicating
+ *                      whether the current error is not null.
+ */
+@Composable
+private fun PasswordTextField(
+    value : String,
+    showSupportingText : Boolean,
+    passwordError : AuthenticationErrorType.Password?,
+    isEnabled : Boolean,
+    onValueChange : (String, Boolean) -> Unit
+) {
+    GenericPasswordTextField(
+        label = stringResource(id = R.string.authentication_email_password),
+        value = value,
+        passwordError = passwordError,
+        supportingText = if (showSupportingText) {
+            stringResource(id = R.string.authentication_email_password_length_required)
+        } else null,
+        isEnabled = isEnabled,
+        onValueChange = { newValue -> onValueChange(newValue, passwordError != null) }
+    )
+}
+
+/**
  * A composable function that displays a confirm password input field.
  * This function leverages the [GenericPasswordTextField] composable to handle the password input
  * with the ability to toggle visibility, while customizing the label and error handling for the confirm password field.
@@ -36,7 +72,7 @@ import com.returdev.tictactoe.ui.screen.authentication.model.AuthenticationError
  * @param isEnabled A boolean value indicating whether the confirm password field is enabled or disabled.
  * @param onValueChange A lambda function that is invoked whenever the confirm password value changes.
  *                      It takes two parameters: the new value of the confirm password and a boolean indicating
- *                      whether the current password error is related to the confirm password field.
+ *                      whether the current password error is not null.
  */
 @Composable
 private fun ConfirmPasswordTextField(
@@ -104,7 +140,8 @@ private fun GenericPasswordTextField(
         isError = passwordError != null,
         supportingText = {
             Text(
-                text = passwordError?.let { stringResource(it.stringRes) } ?: supportingText.orEmpty()
+                text = passwordError?.let { stringResource(it.stringRes) }
+                    ?: supportingText.orEmpty()
             )
         },
         trailingIcon = {
