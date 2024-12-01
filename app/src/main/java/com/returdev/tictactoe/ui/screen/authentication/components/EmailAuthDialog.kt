@@ -25,6 +25,46 @@ import com.returdev.tictactoe.ui.screen.authentication.model.AuthenticationError
 
 
 /**
+ * A composable function that displays a confirm password input field.
+ * This function leverages the [GenericPasswordTextField] composable to handle the password input
+ * with the ability to toggle visibility, while customizing the label and error handling for the confirm password field.
+ *
+ * @param modifier The modifier to be applied to the [GenericPasswordTextField]. Defaults to [Modifier].
+ * @param value The current value of the confirm password input field.
+ * @param passwordError An optional error type specific to the confirm password field. If non-null,
+ *                     an error message related to the confirm password will be shown.
+ * @param isEnabled A boolean value indicating whether the confirm password field is enabled or disabled.
+ * @param onValueChange A lambda function that is invoked whenever the confirm password value changes.
+ *                      It takes two parameters: the new value of the confirm password and a boolean indicating
+ *                      whether the current password error is related to the confirm password field.
+ */
+@Composable
+private fun ConfirmPasswordTextField(
+    modifier : Modifier = Modifier,
+    value : String,
+    passwordError : AuthenticationErrorType.ConfirmPassword?,
+    isEnabled : Boolean,
+    onValueChange : (String, Boolean) -> Unit
+) {
+
+    GenericPasswordTextField(
+        modifier = modifier,
+        label = stringResource(R.string.authentication_email_confirm_password),
+        value = value,
+        supportingText = null,
+        passwordError = passwordError,
+        isEnabled = isEnabled,
+        onValueChange = { newValue ->
+            onValueChange(
+                newValue,
+                passwordError != null
+            )
+        }
+    )
+
+}
+
+/**
  * A composable function that displays a password input field with the ability to toggle password visibility.
  * It supports an optional error message, a label, and a supporting text. The password visibility can be toggled
  * with a button that shows or hides the password as the user types.
@@ -63,8 +103,9 @@ private fun GenericPasswordTextField(
         label = { Text(text = label) },
         isError = passwordError != null,
         supportingText = {
-            Text(text = passwordError?.let { stringResource(it.stringRes) }
-                ?: supportingText.orEmpty())
+            Text(
+                text = passwordError?.let { stringResource(it.stringRes) } ?: supportingText.orEmpty()
+            )
         },
         trailingIcon = {
             IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
