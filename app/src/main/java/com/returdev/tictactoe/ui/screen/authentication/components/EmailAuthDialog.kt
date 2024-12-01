@@ -1,13 +1,23 @@
 package com.returdev.tictactoe.ui.screen.authentication.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,8 +30,100 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.returdev.tictactoe.R
+import com.returdev.tictactoe.ui.screen.authentication.AuthenticationUiState
 import com.returdev.tictactoe.ui.screen.authentication.model.AuthenticationErrorType
+
+
+/**
+ * A composable function that represents the sign-up view in the authentication flow.
+ * This view includes fields for entering email, password, and confirm password, and a button for submitting
+ * the sign-up request. It handles validation errors and manages the state of the input fields.
+ *
+ * @param modifier The modifier to be applied to the root container of the sign-up view. Defaults to [Modifier].
+ * @param state The current state of the authentication UI. Used to determine the enabled state of the fields
+ *              and to display validation errors.
+ * @param resetErrorState A lambda function invoked to reset the error state when a field value changes.
+ * @param onSignUp A lambda function invoked when the sign-up button is clicked.
+ *                 It takes three parameters: the email, password, and confirm password values entered by the user.
+ */
+@Composable
+private fun SignUpView(
+    modifier : Modifier = Modifier,
+    state : AuthenticationUiState,
+    resetErrorState : () -> Unit,
+    onSignUp : (email : String, password : String, confirmPassword : String) -> Unit
+) {
+
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    val isEnabled by remember(state) { mutableStateOf(state !is AuthenticationUiState.EmailAuthLoading) }
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+
+            // Email Input Field
+            EmailTextField(
+                value = email,
+                emailError = (state as? AuthenticationUiState.AuthError)?.error as? AuthenticationErrorType.Email,
+                isEnabled = isEnabled,
+            ) { newValue, isError ->
+                if (isError) {
+                    resetErrorState()
+                }
+                email = newValue
+            }
+
+            // Password Input Field
+            PasswordTextField(
+                value = password,
+                showSupportingText = true,
+                passwordError = (state as? AuthenticationUiState.AuthError)?.error as? AuthenticationErrorType.Password,
+                isEnabled = isEnabled,
+            ) { newValue, isError ->
+                if (isError) {
+                    resetErrorState()
+                }
+                password = newValue
+            }
+
+            // Confirm Password Input Field
+            ConfirmPasswordTextField(
+                value = confirmPassword,
+                passwordError = (state as? AuthenticationUiState.AuthError)?.error as? AuthenticationErrorType.ConfirmPassword,
+                isEnabled = isEnabled
+            ) { newValue, isError ->
+                if (isError) {
+                    resetErrorState()
+                }
+                confirmPassword = newValue
+            }
+
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Sign-Up Button
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { onSignUp(email, password, confirmPassword) },
+            enabled = isEnabled && email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank()
+        ) {
+            Text(text = stringResource(R.string.authentication_email_sign_up))
+        }
+
+    }
+
+}
+
 
 /**
  * A composable function that displays an email input field with error handling and optional supporting text.
@@ -39,7 +141,7 @@ import com.returdev.tictactoe.ui.screen.authentication.model.AuthenticationError
  */
 @Composable
 private fun EmailTextField(
-    modifier : Modifier,
+    modifier : Modifier = Modifier,
     value : String,
     emailError : AuthenticationErrorType.Email?,
     isEnabled : Boolean,
@@ -255,27 +357,39 @@ private fun BottomChangeAuthText(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 private fun EmailAuthDialog() {
 
-    val isSignUp = remember { mutableStateOf(false) }
+    val isSignUp = remember { mutableStateOf(true) }
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-//        BottomChangeAuthText(isSignUpCurrentView = isSignUp.value) {
-//            isSignUp.value = it
-//        }
-//        PasswordTextField(
-//            modifier = Modifier,
-//            label = "Password",
-//            value = "hola",
-//            supportingText = "Escribe la contraseña",
-//            isEnabled = true,
-//            passwordError = AuthenticationErrorType.Password(R.string.authentication_as_guest),
-//            onValueChange = {}
-//        )
+    if (isSignUp.value) {
+        ModalBottomSheet(
+            sheetState = bottomSheetState,
+            onDismissRequest = {}
+        ) {
+            Surface {
+                SignUpView(
+                    modifier = Modifier.padding(16.dp),
+                    state = AuthenticationUiState.AuthSuccess,
+                    resetErrorState = {}
+                ) { _, _, _ -> }
+
+            }
+        }
     }
 
+
+    Surface(modifier = Modifier.fillMaxSize()) {
+
+        Column {
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { isSignUp.value = true }
+            ) { }
+        }
+
+    }
 }
