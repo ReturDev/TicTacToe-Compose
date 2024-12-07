@@ -16,10 +16,11 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,16 +30,58 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Visibility
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.returdev.tictactoe.R
+
+
+/**
+ * A composable that represents the home screen for the game, including options to join an existing game or create a new one.
+ *
+ * This composable observes the `uiState` from the [HomeViewModel] and responds to the loading, success, and error states.
+ * It also provides functionality to join an existing game using a pasted game code or create a new game.
+ * If the state is `HomeUiState.Error`, a snack bar with the error message is shown. If the state is `HomeUiState.Success`,
+ * the user is navigated to the game screen with the game code.
+ *
+ * The screen consists of a logo, buttons for pasting the game code, joining a game, and creating a new game.
+ * A loading indicator is shown when the game is loading.
+ */
+@Composable
+fun HomeScreen(
+    viewModel : HomeViewModel = hiltViewModel(),
+    navigateToGameScreen : (String) -> Unit,
+    showSnackBar : (String) -> Unit
+) {
+
+    val clipboardManager = LocalClipboardManager.current
+    val state by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(key1 = state) {
+        state.let {
+            if (it is HomeUiState.Error) {
+                showSnackBar(it.msg)
+            } else if (it is HomeUiState.Success) {
+                navigateToGameScreen(it.gameCode)
+            }
+        }
+    }
+
+    HomeScreenComposable(
+        isLoading = state is HomeUiState.Loading,
+        pasteGameCode = { clipboardManager.getText()?.text },
+        joinToGame = viewModel::joinToGame,
+        createNewGame = { viewModel.createNewGame() }
+    )
+
+}
 
 
 /**
@@ -254,24 +297,4 @@ private fun HomeMenuButton(
     ) {
         Text(text = text)
     }
-}
-
-
-@Preview
-@Composable
-private fun HomePrev() {
-
-    Surface {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-            HomeScreenComposable(isLoading = false, pasteGameCode = {""}, joinToGame = {}, createNewGame = {})
-
-        }
-    }
-
 }
