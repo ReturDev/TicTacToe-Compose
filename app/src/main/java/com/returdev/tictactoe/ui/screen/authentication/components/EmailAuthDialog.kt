@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -34,6 +33,79 @@ import androidx.compose.ui.unit.dp
 import com.returdev.tictactoe.R
 import com.returdev.tictactoe.ui.screen.authentication.AuthenticationUiState
 import com.returdev.tictactoe.ui.screen.authentication.model.AuthenticationErrorType
+
+/**
+ * A composable function that represents the sign-in view in the authentication flow.
+ * This view provides input fields for email and password, and a button to trigger the sign-in process.
+ * It handles validation errors and manages the state of the input fields.
+ *
+ * @param modifier The modifier to be applied to the root container of the sign-in view. Defaults to [Modifier].
+ * @param state The current state of the authentication UI. Used to determine the enabled state of the fields
+ *              and to display validation errors for the email and password inputs.
+ * @param resetErrorState A lambda function invoked to reset the error state when a field value changes.
+ * @param onSignIn A lambda function invoked when the sign-in button is clicked.
+ *                 It takes two parameters: the email and password values entered by the user.
+ */
+@Composable
+private fun SignInView(
+    modifier: Modifier = Modifier,
+    state: AuthenticationUiState,
+    resetErrorState: () -> Unit,
+    onSignIn: (email: String, password: String) -> Unit
+) {
+
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    val isEnabled by remember(state) { mutableStateOf(state !is AuthenticationUiState.EmailAuthLoading) }
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+
+            EmailTextField(
+                value = email,
+                emailError = (state as? AuthenticationUiState.AuthError)?.error as? AuthenticationErrorType.Email,
+                isEnabled = isEnabled,
+            ) { newValue, isError ->
+                if (isError) {
+                    resetErrorState()
+                }
+                email = newValue
+            }
+
+            PasswordTextField(
+                value = password,
+                showSupportingText = false,
+                passwordError = (state as? AuthenticationUiState.AuthError)?.error as? AuthenticationErrorType.Password,
+                isEnabled = isEnabled,
+            ) { newValue, isError ->
+                if (isError) {
+                    resetErrorState()
+                }
+                password = newValue
+            }
+
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { onSignIn(email, password) },
+            enabled = isEnabled && email.isNotBlank() && password.isNotBlank()
+        ) {
+            Text(text = stringResource(R.string.authentication_email_sign_in))
+        }
+
+    }
+
+}
 
 
 /**
@@ -362,34 +434,26 @@ private fun BottomChangeAuthText(
 @Composable
 private fun EmailAuthDialog() {
 
-    val isSignUp = remember { mutableStateOf(true) }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    if (isSignUp.value) {
-        ModalBottomSheet(
-            sheetState = bottomSheetState,
-            onDismissRequest = {}
-        ) {
-            Surface {
-                SignUpView(
-                    modifier = Modifier.padding(16.dp),
-                    state = AuthenticationUiState.AuthSuccess,
-                    resetErrorState = {}
-                ) { _, _, _ -> }
+    ModalBottomSheet(
+        sheetState = bottomSheetState,
+        onDismissRequest = {}
+    ) {
+        Surface {
+            SignInView(
+                state = AuthenticationUiState.AuthSuccess,
+                resetErrorState = {},
+                onSignIn = {_, _ -> }
+            )
 
-            }
         }
     }
 
 
     Surface(modifier = Modifier.fillMaxSize()) {
 
-        Column {
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { isSignUp.value = true }
-            ) { }
-        }
+        Column {}
 
     }
 }
