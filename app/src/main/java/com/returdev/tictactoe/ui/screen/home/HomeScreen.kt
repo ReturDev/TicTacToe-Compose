@@ -1,5 +1,6 @@
 package com.returdev.tictactoe.ui.screen.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,7 +25,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -32,6 +36,30 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.returdev.tictactoe.R
+
+/**
+ * A composable that displays the application's logo image.
+ *
+ * This composable renders the logo image of the app, scaled to 70% of the available width and cropped to fit.
+ * It accepts an optional [modifier] parameter to customize the appearance and layout of the logo.
+ *
+ * @param modifier A [Modifier] that can be used to adjust the layout, size, and other properties of the logo image.
+ **/
+@Composable
+private fun HomeLogo(
+    modifier : Modifier = Modifier
+) {
+
+    Image(
+        modifier = modifier
+            .fillMaxWidth(0.7f)
+            .scale(1f),
+        painter = painterResource(id = R.drawable.app_logo),
+        contentDescription = null,
+        contentScale = ContentScale.Crop
+    )
+
+}
 
 /**
  * A composable that displays a menu for joining a game or creating a new one.
@@ -169,8 +197,11 @@ private fun HomePrev() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
+            HomeLogo()
 
             HomeButtonsMenu(isEnabled = true, pasteGameCode = {""}, joinToGame = {}, createNewGame = {})
 
