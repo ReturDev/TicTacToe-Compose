@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,12 +13,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,13 +30,56 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Visibility
 import com.returdev.tictactoe.R
 import com.returdev.tictactoe.ui.screen.authentication.AuthenticationUiState
 import com.returdev.tictactoe.ui.screen.authentication.model.AuthenticationErrorType
+
+/**
+ * A composable function that displays an email authentication dialog within a modal bottom sheet.
+ * This dialog provides a user interface for both sign-in and sign-up workflows, with the ability to handle
+ * authentication errors and close the dialog when needed.
+ *
+ * @param state A [State] object representing the current state of the authentication UI.
+ *              This is used to manage the UI's behavior and display appropriate error messages.
+ * @param resetErrorState A lambda function invoked to reset the error state when the user modifies input fields.
+ * @param onSignIn A lambda function invoked when the user attempts to sign in.
+ *                 It takes two parameters: the email and password values entered by the user.
+ * @param onSignUp A lambda function invoked when the user attempts to sign up.
+ *                 It takes three parameters: the email, password, and confirm password values entered by the user.
+ * @param onClose A lambda function invoked when the dialog is dismissed, either by the user or programmatically.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EmailAuthDialog(
+    state: State<AuthenticationUiState>,
+    resetErrorState: () -> Unit,
+    onSignIn: (email: String, password: String) -> Unit,
+    onSignUp: (email: String, password: String, confirmPassword: String) -> Unit,
+    onClose: () -> Unit
+) {
+
+    val bottomSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+
+    // Modal bottom sheet for displaying the authentication UI
+    ModalBottomSheet(
+        onDismissRequest = onClose,
+        sheetState = bottomSheetState,
+        dragHandle = null
+    ) {
+        // Composable handling the authentication logic and UI
+        EmailAuthComposable(
+            state = state.value,
+            resetErrorState = resetErrorState,
+            onSignIn = onSignIn,
+            onSignUp = onSignUp
+        )
+    }
+}
 
 /**
  * A composable function that renders the email authentication screen, including both sign-in and sign-up views.
@@ -543,36 +585,4 @@ private fun BottomChangeAuthText(
 
     }
 
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview
-@Composable
-private fun EmailAuthDialog() {
-
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val isSignIn = remember { mutableStateOf(true) }
-
-
-    ModalBottomSheet(
-        sheetState = bottomSheetState,
-        onDismissRequest = {}
-    ) {
-        Surface {
-
-            EmailAuthComposable(
-                state = AuthenticationUiState.Initial,
-                resetErrorState = {},
-                onSignIn = { _, _ ->}
-            ) { _,_,_ -> }
-
-        }
-    }
-
-
-    Surface(modifier = Modifier.fillMaxSize()) {
-
-        Column {}
-
-    }
 }
