@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -35,7 +36,74 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Visibility
 import com.returdev.tictactoe.R
+
+
+/**
+ * A composable that represents the home screen layout with the logo, buttons, and a loading indicator.
+ *
+ * This composable arranges the logo, game-related buttons, and a loading indicator within a [ConstraintLayout].
+ * If [isLoading] is `true`, a loading spinner is displayed in the center of the screen. Otherwise, the game-related
+ * buttons for pasting a game code, joining an existing game, or creating a new game are enabled and displayed.
+ *
+ * @param modifier A [Modifier] to customize the layout of the composable. Default is [Modifier], which applies no modifications.
+ * @param isLoading A boolean that determines if the loading indicator should be shown. When `true`, the loading indicator is visible, and the buttons are disabled.
+ * @param pasteGameCode A function that retrieves the game code from the clipboard, used when the user wants to join an existing game.
+ * @param joinToGame A function that takes a game code as a parameter and initiates the process of joining a game.
+ * @param createNewGame A function that is triggered when the user wants to create a new game.
+ */
+@Composable
+private fun HomeScreenComposable(
+    modifier : Modifier = Modifier,
+    isLoading : Boolean,
+    pasteGameCode : () -> String?,
+    joinToGame : (String) -> Unit,
+    createNewGame : () -> Unit
+) {
+
+    ConstraintLayout(
+        modifier = modifier.fillMaxSize()
+    ) {
+
+        val (logoCons, buttonsCons, loadingCons) = createRefs()
+        createVerticalChain(logoCons, buttonsCons)
+
+        HomeLogo(
+            modifier = Modifier.constrainAs(logoCons) {
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+            }
+        )
+
+        HomeButtonsMenu(
+            modifier = Modifier.constrainAs(buttonsCons){
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+            },
+            isEnabled = !isLoading,
+            pasteGameCode = pasteGameCode,
+            joinToGame = joinToGame,
+            createNewGame = createNewGame
+        )
+
+        CircularProgressIndicator(
+            modifier = Modifier.constrainAs(loadingCons){
+
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+
+                visibility = if (isLoading) Visibility.Visible else Visibility.Gone
+
+            }
+        )
+
+    }
+
+}
 
 /**
  * A composable that displays the application's logo image.
@@ -201,9 +269,7 @@ private fun HomePrev() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            HomeLogo()
-
-            HomeButtonsMenu(isEnabled = true, pasteGameCode = {""}, joinToGame = {}, createNewGame = {})
+            HomeScreenComposable(isLoading = false, pasteGameCode = {""}, joinToGame = {}, createNewGame = {})
 
         }
     }
