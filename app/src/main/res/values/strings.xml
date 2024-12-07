@@ -16,4 +16,14 @@
     <string name="authentication_email_password">Password</string>
     <string name="authentication_email_password_length_required">Enter at least 8 characters</string>
     <string name="authentication_email_email_label">Email</string>
+
+    <!--Home Screen -->
+    <string name="home_screen_new_game">Create new game</string>
+    <string name="home_screen_game_code_placeholder">Introduce the game code</string>
+    <string name="home_screen_join_to_game">Join to game</string>
+    <string name="home_screen_clear_game_code">Clear game code</string>
+    <string name="home_screen_paste_code">Paste game code</string>
+    <string name="home_screen_or_divider">OR</string>
+
+
 </resources>
