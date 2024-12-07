@@ -7,10 +7,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,13 +28,127 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Visibility
 import com.returdev.tictactoe.R
 import com.returdev.tictactoe.ui.screen.authentication.AuthenticationUiState
 import com.returdev.tictactoe.ui.screen.authentication.model.AuthenticationErrorType
+
+/**
+ * A composable function that renders the email authentication screen, including both sign-in and sign-up views.
+ * It dynamically switches between the sign-in and sign-up screens based on user interaction and manages the authentication state.
+ *
+ * @param modifier The modifier to be applied to the root container of the authentication screen. Defaults to [Modifier].
+ * @param state The current state of the authentication UI. Used to manage the enabled state of fields and display validation errors.
+ * @param resetErrorState A lambda function invoked to reset the error state when a field value changes.
+ * @param onSignIn A lambda function invoked when the user attempts to sign in.
+ *                 It takes two parameters: the email and password values entered by the user.
+ * @param onSignUp A lambda function invoked when the user attempts to sign up.
+ *                 It takes three parameters: the email, password, and confirm password values entered by the user.
+ */
+@Composable
+private fun EmailAuthComposable(
+    modifier: Modifier = Modifier,
+    state: AuthenticationUiState,
+    resetErrorState: () -> Unit,
+    onSignIn: (email: String, password: String) -> Unit,
+    onSignUp: (email: String, password: String, confirmPassword: String) -> Unit
+) {
+    var isSignUpScreen by remember {
+        mutableStateOf(false)
+    }
+
+    ConstraintLayout(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+
+        val (titleCons, signUpCons, signInCons, changeViewCons) = createRefs()
+
+        EmailAuthDialogTitle(
+            modifier = Modifier.constrainAs(titleCons) {
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                top.linkTo(parent.top)
+            },
+            title = stringResource(
+                id = if (isSignUpScreen) {
+                    R.string.authentication_email_sign_up
+                } else {
+                    R.string.authentication_email_sign_in
+                }
+            )
+        )
+
+        SignUpView(
+            modifier = Modifier
+                .constrainAs(signUpCons) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(titleCons.bottom)
+                    bottom.linkTo(changeViewCons.top)
+                    visibility = if (isSignUpScreen) Visibility.Visible else Visibility.Gone
+                }
+                .padding(vertical = 8.dp),
+            state = state,
+            resetErrorState = resetErrorState,
+            onSignUp = onSignUp
+        )
+
+        SignInView(
+            modifier = Modifier
+                .constrainAs(signInCons) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(titleCons.bottom)
+                    bottom.linkTo(changeViewCons.top)
+                    visibility = if (isSignUpScreen) Visibility.Gone else Visibility.Visible
+                }
+                .padding(vertical = 8.dp),
+            state = state,
+            resetErrorState = resetErrorState,
+            onSignIn = onSignIn
+        )
+
+        BottomChangeAuthText(
+            modifier = Modifier.constrainAs(changeViewCons) {
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                bottom.linkTo(parent.bottom)
+            },
+            isSignUpCurrentView = isSignUpScreen
+        ) {
+            isSignUpScreen = !isSignUpScreen
+        }
+    }
+}
+
+
+/**
+ * A composable function that displays a bold and stylized title for the authentication dialog.
+ *
+ * @param modifier The modifier to be applied to the [Text] composable. Defaults to [Modifier].
+ * @param title The title text to be displayed in the dialog. Typically reflects the current authentication action
+ *              (e.g., "Sign In" or "Sign Up").
+ */
+@Composable
+private fun EmailAuthDialogTitle(
+    modifier: Modifier = Modifier,
+    title: String
+) {
+    Text(
+        modifier = modifier,
+        text = title,
+        fontWeight = FontWeight.Bold,
+        style = MaterialTheme.typography.displaySmall
+    )
+}
 
 /**
  * A composable function that represents the sign-in view in the authentication flow.
@@ -435,17 +551,20 @@ private fun BottomChangeAuthText(
 private fun EmailAuthDialog() {
 
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val isSignIn = remember { mutableStateOf(true) }
+
 
     ModalBottomSheet(
         sheetState = bottomSheetState,
         onDismissRequest = {}
     ) {
         Surface {
-            SignInView(
-                state = AuthenticationUiState.AuthSuccess,
+
+            EmailAuthComposable(
+                state = AuthenticationUiState.Initial,
                 resetErrorState = {},
-                onSignIn = {_, _ -> }
-            )
+                onSignIn = { _, _ ->}
+            ) { _,_,_ -> }
 
         }
     }
