@@ -1,18 +1,23 @@
 package com.returdev.tictactoe.ui.screen.game
 
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -21,7 +26,58 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.returdev.tictactoe.ui.screen.game.model.PlayerSymbol
+import kotlin.random.Random
 
+
+/**
+ * Composable function representing a single cell on a game board.
+ *
+ * @param modifier Modifier for customizing the appearance and layout of the cell.
+ * @param cellValue The current value of the cell, which can be either [PlayerSymbol.X], [PlayerSymbol.O], or null.
+ *                  If null, the cell is empty.
+ * @param onClick Callback function to be invoked when the cell is clicked.
+ */
+@Composable
+private fun BoardCell(
+    modifier: Modifier = Modifier,
+    cellValue: PlayerSymbol?,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .minimumInteractiveComponentSize()
+            .aspectRatio(1f)
+            .clickable(onClick = onClick)
+            .border(2.dp, Color.Red)
+            .padding(4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+
+        // Animates the drawing progress of the cell symbol (either X or O)
+        val progress = animateFloatAsState(
+            targetValue = if (cellValue == null) 0f else 1f,
+            label = "cell-value-animation"
+        )
+
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(10.dp)
+        ) {
+
+            // Draw the appropriate symbol if a cell value is provided
+            cellValue?.let {
+                when (it) {
+                    PlayerSymbol.X -> drawX(progress.value, it.color)
+                    PlayerSymbol.O -> drawO(progress.value, it.color)
+                }
+            }
+
+        }
+
+    }
+}
 
 /**
  * Draws a circular shape on the canvas based on the given progress and color.
@@ -41,7 +97,7 @@ private fun DrawScope.drawO(
         sweepAngle = -360f * progress,
         useCenter = false,
         style = Stroke(
-            width = this.size.width / 3,
+            width = (this.size.width / 3).coerceAtMost(15.dp.toPx()),
             cap = StrokeCap.Round
         )
     )
@@ -64,7 +120,7 @@ private fun DrawScope.drawX(
     val width = size.width
     val height = size.height
     val style = Stroke(
-        width = width / 3,
+        width = (width / 3).coerceAtMost(10.dp.toPx()),
         cap = StrokeCap.Round
     )
 
@@ -106,27 +162,31 @@ private fun DrawScope.drawX(
 @Preview
 private fun GameScreenPreview(){
 
-    val isVisible = remember { mutableStateOf(false) };
-
-    val animatedFloat = animateFloatAsState(targetValue = if (isVisible.value) 1f else 0f, animationSpec = tween(durationMillis = 1000, easing = LinearEasing ))
-
+    val cellValue : MutableState<PlayerSymbol?> = remember { mutableStateOf(null) }
     Surface {
 
         Column(modifier = Modifier.fillMaxSize()) {
 
-            Button(onClick = {isVisible.value = true}) {
+            Button(onClick = {
 
+                val random = Random.nextInt(0, 11)
 
-            }
-
-            if (isVisible.value){
-                Canvas(
-                    modifier = Modifier.size(50.dp).padding(10.dp)
-                ){
-//                    drawX(animatedFloat.value, Color.Red)
-                    drawO(animatedFloat.value, Color.Red)
+                cellValue.value = if (random <= 5){
+                    PlayerSymbol.X
+                } else {
+                    PlayerSymbol.O
                 }
+
+
+            }) {
+
+
             }
+
+            BoardCell(
+                modifier = Modifier.width(100.dp),
+                cellValue = cellValue.value
+            ) { }
 
 
         }
